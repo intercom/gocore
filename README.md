@@ -66,9 +66,28 @@ func main() {
 
 To add a new recorder, implement the MetricsRecorder interface.
 
-#### Sentry
+#### Monitoring
 
-Coming Soon
+Standardised Monitoring options, for Global setup or individual. Currently, monitoring to Sentry is implemented.
+
+```go
+import "github.com/intercom/gocore/monitoring"
+
+func main() {
+  // set the global monitoring recorder to a new sentry monitor
+  // without this, global monitoring is no-opped.
+  monitoring.SetMonitoringGlobal(monitoring.NewSentryMonitor("sentryDSN"))
+
+  // use global monitoring
+  monitoring.CaptureException(errors.New("NewError"))
+
+  // create a new monitoring instance:
+  sentryMonitoring := monitoring.NewSentryMonitor("sentryDSN")
+
+  // use same capture method
+  sentryMonitoring.CaptureException(errors.New("NewError"))
+}
+```
 
 #### Dependencies
 
@@ -83,4 +102,10 @@ Armon/Go-Metrics:
 
 ```
 "github.com/armon/go-metrics"
+```
+
+Sentry/Raven:
+
+```
+"github.com/getsentry/raven-go"
 ```
