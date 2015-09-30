@@ -35,11 +35,17 @@ func LogErrorMessage(message string, keyvalues ...interface{}) {
 
 // Log a series of key, values to Info
 func LogInfo(keyvals ...interface{}) {
+	if len(keyvals) == 1 {
+		keyvals = []interface{}{"msg", keyvals[0]}
+	}
 	logger.Info(keyvals...)
 }
 
 // Log a series of key, values to Error
 func LogError(keyvals ...interface{}) {
+	if len(keyvals) == 1 {
+		keyvals = []interface{}{"msg", keyvals[0]}
+	}
 	logger.Error(keyvals...)
 }
 

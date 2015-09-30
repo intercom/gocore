@@ -17,17 +17,20 @@ Structured logs in standard LogFmt format, with levels.
 import corelog "github.com/intercom/gocore/log"
 
 func main() {
-  // setup logger before using
-  corelog.SetupLoggerToStderr()
+	// setup logger before using
+	corelog.SetupLoggerToStderr()
 
-  // log messages
-  corelog.LogInfoMessage("reading items")
+	// log messages
+	corelog.LogInfoMessage("reading items")
 
-  // structured logging
-  corelog.LogInfo("read_item_count", 4, "status", "finished")
+	// structured logging
+	corelog.LogInfo("read_item_count", 4, "status", "finished")
 
-  // both
-  corelog.LogInfoMessage("reading items", "read_item_count", 4, "status", "finished")
+	// both
+	corelog.LogInfoMessage("reading items", "read_item_count", 4, "status", "finished")
+
+  // setting standard fields
+  corelog.SetStandardFields("instance_id", "67daf")
 }
 ```
 

@@ -7,6 +7,25 @@ import (
 	"github.com/intercom/gocore/log"
 )
 
+func TestLogInfo(t *testing.T) {
+	buf := bytes.Buffer{}
+	log.SetupLoggerTo(&buf)
+	log.LogInfo("foo", "bar")
+	if want, have := "level=info foo=bar\n", buf.String(); want != have {
+		t.Errorf("want %#v, have %#v", want, have)
+	}
+}
+
+func TestLogInfoWithOneValueBecomesMessage(t *testing.T) {
+	buf := bytes.Buffer{}
+	log.SetupLoggerTo(&buf)
+	log.LogInfo("foo")
+	if want, have := "level=info msg=foo\n", buf.String(); want != have {
+		t.Errorf("want %#v, have %#v", want, have)
+	}
+	log.LogInfo("foo")
+}
+
 func TestLogInfoMessage(t *testing.T) {
 	buf := bytes.Buffer{}
 	log.SetupLoggerTo(&buf)
