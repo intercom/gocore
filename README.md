@@ -78,3 +78,9 @@ GoKit Log, Levels:
 "github.com/go-kit/kit/log"
 "github.com/go-kit/kit/log/levels"
 ```
+
+Armon/Go-Metrics:
+
+```
+"github.com/armon/go-metrics"
+```
