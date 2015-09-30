@@ -14,20 +14,22 @@ Structured logs in standard LogFmt format, with levels.
 
 ```go
 
+
+// don't have to set a namespace, can just import and reference via "log" if you don't need the default logger too.
 import corelog "github.com/intercom/gocore/log"
 
 func main() {
-	// setup logger before using
-	corelog.SetupLoggerToStderr()
+  // setup logger before using
+  corelog.SetupLoggerToStderr()
 
-	// log messages
-	corelog.LogInfoMessage("reading items")
+  // log messages
+  corelog.LogInfoMessage("reading items")
 
-	// structured logging
-	corelog.LogInfo("read_item_count", 4, "status", "finished")
+  // structured logging
+  corelog.LogInfo("read_item_count", 4, "status", "finished")
 
-	// both
-	corelog.LogInfoMessage("reading items", "read_item_count", 4, "status", "finished")
+  // both
+  corelog.LogInfoMessage("reading items", "read_item_count", 4, "status", "finished")
 
   // setting standard fields
   corelog.SetStandardFields("instance_id", "67daf")
@@ -36,7 +38,33 @@ func main() {
 
 #### Metrics
 
-Coming Soon
+Standardised Metrics options, for Global setup or individual.
+
+```go
+
+import "github.com/intercom/gocore/metrics"
+
+func main() {
+  // set the global metrics recorder to a new statsd recorder with namespace
+  // without this, global metrics are no-opped.
+  metrics.SetMetricsGlobal(metrics.NewStatsdRecorder("127.0.0.1:8888", "namespace"))
+
+  // use global metrics
+  metrics.IncrementCount("metricName")
+  metrics.MeasureSince("metricName", startTime)
+
+  // set prefix for all global metrics
+  metrics.SetPrefix("prefixName")
+
+  // create a new metric instance for separate collections:
+  perAppMetrics := metrics.NewStatsdRecorder("127.0.0.1:8889", "per-app-namespace")
+
+  // use same recording methods
+  perAppMetrics.IncrementCount("metricName")
+}
+```
+
+To add a new recorder, implement the MetricsRecorder interface.
 
 #### Sentry
 
