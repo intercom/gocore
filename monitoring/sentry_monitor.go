@@ -10,12 +10,12 @@ type SentryMonitor struct {
 	ravenClient *raven.Client
 }
 
-func NewSentryMonitor(ravenDSN string) *SentryMonitor {
+func NewSentryMonitor(ravenDSN string) (*SentryMonitor, error) {
 	client, err := raven.NewClient(ravenDSN, nil)
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	return &SentryMonitor{ravenClient: client}
+	return &SentryMonitor{ravenClient: client}, nil
 }
 
 func (sm *SentryMonitor) CaptureException(err error) {

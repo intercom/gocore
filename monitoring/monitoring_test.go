@@ -43,10 +43,10 @@ func TestMonitoringWithTags(t *testing.T) {
 	}
 }
 
-func TestMonitoringSetupSentryReturnsNilOnFail(t *testing.T) {
-	sm := monitoring.NewSentryMonitor("abc123daef")
-	if sm != nil {
-		t.Errorf("Expected nil, got %v", sm)
+func TestMonitoringSetupSentryReturnsErrorOnFail(t *testing.T) {
+	_, err := monitoring.NewSentryMonitor("abc123daef")
+	if err == nil {
+		t.Errorf("Expected error, did not get")
 	}
 }
 

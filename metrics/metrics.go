@@ -28,9 +28,7 @@ func init() {
 // (If you don't care about metrics, you don't need to call this function;
 // nothing will break, since a no-op metrics sink is used by default.)
 func SetMetricsGlobal(recorder MetricsRecorder) {
-	if recorder != nil {
-		globalMetrics = recorder
-	}
+	globalMetrics = recorder
 }
 
 // Increment Count by 1 for Metric by name

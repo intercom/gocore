@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"errors"
 	"time"
 
 	"github.com/armon/go-metrics"
@@ -14,9 +15,9 @@ type StatsdRecorder struct {
 }
 
 // Takes a host:port string of the statsite endpoint to write to.
-func NewStatsdRecorder(statsiteEndpoint, namespace string) *StatsdRecorder {
+func NewStatsdRecorder(statsiteEndpoint, namespace string) (*StatsdRecorder, error) {
 	if statsiteEndpoint == "" {
-		return nil
+		return nil, errors.New("Uninitialized StatsdRecorder")
 	}
 	// statsdsink can be used to send to statssite over UDP
 	// https://github.com/armon/go-metrics/blob/master/statsd.go#L21
@@ -24,7 +25,7 @@ func NewStatsdRecorder(statsiteEndpoint, namespace string) *StatsdRecorder {
 	config := metrics.DefaultConfig(namespace)
 	config.EnableHostname = false
 	m, _ := metrics.New(config, sink)
-	return &StatsdRecorder{Metrics: m}
+	return &StatsdRecorder{Metrics: m}, nil
 }
 
 func (m *StatsdRecorder) IncrementCount(metricName string) {

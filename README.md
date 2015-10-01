@@ -47,7 +47,10 @@ import "github.com/intercom/gocore/metrics"
 func main() {
   // set the global metrics recorder to a new statsd recorder with namespace
   // without this, global metrics are no-opped.
-  metrics.SetMetricsGlobal(metrics.NewStatsdRecorder("127.0.0.1:8888", "namespace"))
+  statsdRecorder, err := metrics.NewStatsdRecorder("127.0.0.1:8888", "namespace")
+  if err == nil {
+    metrics.SetMetricsGlobal(statsdRecorder)
+  }
 
   // use global metrics
   metrics.IncrementCount("metricName")
@@ -57,7 +60,7 @@ func main() {
   metrics.SetPrefix("prefixName")
 
   // create a new metric instance for separate collections:
-  perAppMetrics := metrics.NewStatsdRecorder("127.0.0.1:8889", "per-app-namespace")
+  perAppMetrics, _ := metrics.NewStatsdRecorder("127.0.0.1:8889", "per-app-namespace")
 
   // use same recording methods
   perAppMetrics.IncrementCount("metricName")
@@ -76,13 +79,16 @@ import "github.com/intercom/gocore/monitoring"
 func main() {
   // set the global monitoring recorder to a new sentry monitor
   // without this, global monitoring is no-opped.
-  monitoring.SetMonitoringGlobal(monitoring.NewSentryMonitor("sentryDSN"))
+  sentryMonitor, err := monitoring.NewSentryMonitor("sentryDSN")
+  if err == nil {
+    monitoring.SetMonitoringGlobal(sentryMonitor)
+  }
 
   // use global monitoring
   monitoring.CaptureException(errors.New("NewError"))
 
   // create a new monitoring instance:
-  sentryMonitoring := monitoring.NewSentryMonitor("sentryDSN")
+  sentryMonitoring, _ := monitoring.NewSentryMonitor("sentryDSN")
 
   // use same capture method
   sentryMonitoring.CaptureException(errors.New("NewError"))
