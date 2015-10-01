@@ -28,6 +28,21 @@ func TestMonitoringIndividual(t *testing.T) {
 	}
 }
 
+func TestMonitoringWithTags(t *testing.T) {
+	tm := &TestMonitor{}
+	tm.CaptureExceptionWithTags(errors.New("Bar"), "tag", "value")
+
+	if tm.latestError.Error() != "Bar" {
+		t.Errorf("Expected Bar, got %v", tm.latestError.Error())
+	}
+	if tm.latestTags[0] != "tag" {
+		t.Errorf("Expected tag, got %v", tm.latestTags[0])
+	}
+	if tm.latestTags[1] != "value" {
+		t.Errorf("Expected value, got %v", tm.latestTags[1])
+	}
+}
+
 func TestMonitoringSetupSentryReturnsNilOnFail(t *testing.T) {
 	sm := monitoring.NewSentryMonitor("abc123daef")
 	if sm != nil {
@@ -37,8 +52,14 @@ func TestMonitoringSetupSentryReturnsNilOnFail(t *testing.T) {
 
 type TestMonitor struct {
 	latestError error
+	latestTags  []interface{}
 }
 
 func (tm *TestMonitor) CaptureException(err error) {
 	tm.latestError = err
+}
+
+func (tm *TestMonitor) CaptureExceptionWithTags(err error, tags ...interface{}) {
+	tm.latestError = err
+	tm.latestTags = tags
 }
