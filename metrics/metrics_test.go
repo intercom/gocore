@@ -24,7 +24,7 @@ func TestSetMetricsGlobal(t *testing.T) {
 }
 
 func TestGetStatsdMetric(t *testing.T) {
-	sd := metrics.NewStatsdRecorder("127.0.0.1:8888", "namespace")
+	sd, _ := metrics.NewStatsdRecorder("127.0.0.1:8888", "namespace")
 	sd.IncrementCount("countMetric") // doesn't panic
 	metrics.SetMetricsGlobal(sd)
 	metrics.IncrementCount("countMetric")

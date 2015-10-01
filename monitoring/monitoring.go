@@ -18,9 +18,7 @@ func init() {
 
 // setup the monitoring global
 func SetMonitoringGlobal(monitor Monitor) {
-	if monitor != nil {
-		globalMonitor = monitor
-	}
+	globalMonitor = monitor
 }
 
 // Capture an exception
