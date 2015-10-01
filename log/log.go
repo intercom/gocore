@@ -1,8 +1,10 @@
 package log
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"reflect"
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/levels"
@@ -38,7 +40,7 @@ func LogInfo(keyvals ...interface{}) {
 	if len(keyvals) == 1 {
 		keyvals = []interface{}{"msg", keyvals[0]}
 	}
-	logger.Info(keyvals...)
+	logger.Info(encodeCompoundValues(keyvals...)...)
 }
 
 // Log a series of key, values to Error
@@ -46,12 +48,30 @@ func LogError(keyvals ...interface{}) {
 	if len(keyvals) == 1 {
 		keyvals = []interface{}{"msg", keyvals[0]}
 	}
-	logger.Error(keyvals...)
+	logger.Error(encodeCompoundValues(keyvals...)...)
 }
 
 // Sets standard fields on the logger, for all calls
 func SetStandardFields(keyvals ...interface{}) {
-	logger = logger.With(keyvals...)
+	logger = logger.With(encodeCompoundValues(keyvals...)...)
+}
+
+// Encode compound values using %+v. To use a custom encoding, use a type that implements fmt.Stringer
+func encodeCompoundValues(keyvals ...interface{}) []interface{} {
+	if len(keyvals)%2 == 1 {
+		keyvals = append(keyvals, nil) // missing a value
+	}
+
+	for i := 0; i < len(keyvals); i += 2 {
+		_, v := keyvals[i], keyvals[i+1]
+
+		rvalue := reflect.ValueOf(v)
+		switch rvalue.Kind() {
+		case reflect.Array, reflect.Chan, reflect.Func, reflect.Map, reflect.Slice, reflect.Struct:
+			keyvals[i+1] = fmt.Sprintf("%+v", v)
+		}
+	}
+	return keyvals
 }
 
 // Package-level default initialization of the logger.
