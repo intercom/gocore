@@ -20,7 +20,10 @@ import corelog "github.com/intercom/gocore/log"
 
 func main() {
   // setup logger before using
-  corelog.SetupLoggerToStderr()
+  corelog.SetupLogFmtLoggerTo(os.Stderr)
+
+  // or JSON format:
+  corelog.SetupJSONLoggerTo(os.Stderr)
 
   // log messages
   corelog.LogInfoMessage("reading items")
