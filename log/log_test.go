@@ -66,9 +66,17 @@ func TestLogWithStandardFields(t *testing.T) {
 	checkLogFormatMatches(t, "level=info foo=bar key=4 msg=something\n", buf)
 }
 
+func TestJSONLog(t *testing.T) {
+	buf := bytes.Buffer{}
+	log.SetupJSONLoggerTo(&buf)
+
+	log.LogInfoMessage("something", "key", 4)
+	checkLogFormatMatches(t, "{\"key\":4,\"level\":\"info\",\"msg\":\"something\"}\n", &buf)
+}
+
 func logWithBuffer() *bytes.Buffer {
 	buf := bytes.Buffer{}
-	log.SetupLoggerTo(&buf)
+	log.SetupLogFmtLoggerTo(&buf)
 	return &buf
 }
 

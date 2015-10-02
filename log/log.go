@@ -3,7 +3,6 @@ package log
 import (
 	"fmt"
 	"io"
-	"os"
 	"reflect"
 
 	kitlog "github.com/go-kit/kit/log"
@@ -15,14 +14,17 @@ var (
 )
 
 // Public initialization function to initialize the logger global.
+// Logfmt format.
 // This should be called before any goroutines using the logger are started
-func SetupLoggerTo(writer io.Writer) {
+func SetupLogFmtLoggerTo(writer io.Writer) {
 	logger = levels.New(kitlog.NewLogfmtLogger(writer))
 }
 
-// Convenience setup for Stderr
-func SetupLoggerToStderr() {
-	SetupLoggerTo(os.Stderr)
+// Public initialization function to initialize the logger global.
+// JSON format.
+// This should be called before any goroutines using the logger are started
+func SetupJSONLoggerTo(writer io.Writer) {
+	logger = levels.New(kitlog.NewJSONLogger(writer))
 }
 
 // Log a message to Info, with optional keyvalues
