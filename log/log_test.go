@@ -2,21 +2,25 @@ package log_test
 
 import (
 	"bytes"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/intercom/gocore/log"
 )
 
+var testTime = time.Now().UTC().Format(time.RFC3339)
+
 func TestLogInfo(t *testing.T) {
 	buf := logWithBuffer()
-	log.LogInfo("foo", "bar")
-	checkLogFormatMatches(t, "level=info foo=bar\n", buf)
+	log.LogInfo(testTime, "foo", "bar")
+	checkLogFormatMatches(t, fmt.Sprintf("level=info time=%s foo=bar\n", testTime), buf)
 }
 
 func TestLogInfoWithOneValueBecomesMessage(t *testing.T) {
 	buf := logWithBuffer()
-	log.LogInfo("foo")
-	checkLogFormatMatches(t, "level=info msg=foo\n", buf)
+	log.LogInfo(testTime, "foo")
+	checkLogFormatMatches(t, fmt.Sprintf("level=info time=%s msg=foo\n", testTime), buf)
 }
 
 func TestLogInfoMessage(t *testing.T) {
@@ -39,20 +43,20 @@ func TestLogErrorMessageWithExtra(t *testing.T) {
 
 func TestLogInfoWithCompoundTypeArray(t *testing.T) {
 	buf := logWithBuffer()
-	log.LogInfo("key", []string{"foo", "bar"})
-	checkLogFormatMatches(t, "level=info key=\"[foo bar]\"\n", buf)
+	log.LogInfo(testTime, "key", []string{"foo", "bar"})
+	checkLogFormatMatches(t, fmt.Sprintf("level=info time=%s key=\"[foo bar]\"\n", testTime), buf)
 }
 
 func TestLogInfoWithCompoundTypeMap(t *testing.T) {
 	buf := logWithBuffer()
-	log.LogInfo("key", map[string]interface{}{"another": 12})
-	checkLogFormatMatches(t, "level=info key=map[another:12]\n", buf)
+	log.LogInfo(testTime, "key", map[string]interface{}{"another": 12})
+	checkLogFormatMatches(t, fmt.Sprintf("level=info time=%s key=map[another:12]\n", testTime), buf)
 }
 
 func TestLogInfoWithCompoundTypeStruct(t *testing.T) {
 	buf := logWithBuffer()
-	log.LogInfo("key", testTypeNotStringer{"foo"}, "bar", testTypeStringer{"bar"})
-	checkLogFormatMatches(t, "level=info key={Foo:foo} bar=bar\n", buf)
+	log.LogInfo(testTime, "key", testTypeNotStringer{"foo"}, "bar", testTypeStringer{"bar"})
+	checkLogFormatMatches(t, fmt.Sprintf("level=info time=%s key={Foo:foo} bar=bar\n", testTime), buf)
 }
 
 func TestLogWithStandardFields(t *testing.T) {

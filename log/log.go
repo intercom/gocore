@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"time"
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/levels"
@@ -29,27 +30,29 @@ func SetupJSONLoggerTo(writer io.Writer) {
 
 // Log a message to Info, with optional keyvalues
 func LogInfoMessage(message string, keyvalues ...interface{}) {
-	LogInfo(append(keyvalues, "msg", message)...)
+	LogInfo(currentTime(), append(keyvalues, "msg", message)...)
 }
 
 // Log a message to Error, with optional keyvalues
 func LogErrorMessage(message string, keyvalues ...interface{}) {
-	LogError(append(keyvalues, "msg", message)...)
+	LogError(currentTime(), append(keyvalues, "msg", message)...)
 }
 
 // Log a series of key, values to Info
-func LogInfo(keyvals ...interface{}) {
+func LogInfo(time string, keyvals ...interface{}) {
 	if len(keyvals) == 1 {
 		keyvals = []interface{}{"msg", keyvals[0]}
 	}
+	keyvals = append([]interface{}{"time", time}, keyvals...)
 	logger.Info(encodeCompoundValues(keyvals...)...)
 }
 
 // Log a series of key, values to Error
-func LogError(keyvals ...interface{}) {
+func LogError(time string, keyvals ...interface{}) {
 	if len(keyvals) == 1 {
 		keyvals = []interface{}{"msg", keyvals[0]}
 	}
+	keyvals = append([]interface{}{"time", time}, keyvals...)
 	logger.Error(encodeCompoundValues(keyvals...)...)
 }
 
@@ -81,4 +84,8 @@ func encodeCompoundValues(keyvals ...interface{}) []interface{} {
 // later calls can replace it by calling SetupLogger.
 func init() {
 	logger = levels.New(kitlog.NewNopLogger())
+}
+
+func currentTime() string {
+	return time.Now().UTC().Format(time.RFC3339)
 }
