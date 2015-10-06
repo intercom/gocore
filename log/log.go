@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-	"time"
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/levels"
@@ -18,19 +17,25 @@ var (
 // Logfmt format.
 // This should be called before any goroutines using the logger are started
 func SetupLogFmtLoggerTo(writer io.Writer) {
-	logger = levels.New(kitlog.NewLogfmtLogger(writer))
-	// I feel bad doing this, but the json logger sorts the fields
-	// in alphabetical order, so this ensures its first
-	logger = logger.With("ats", kitlog.DefaultTimestampUTC)
+	l := logfmtLoggerTo(writer)
+	l = l.With("aaats", kitlog.DefaultTimestampUTC)
+	SetupGlobalLoggerTo(l)
 }
 
 // Public initialization function to initialize the logger global.
 // JSON format.
 // This should be called before any goroutines using the logger are started
 func SetupJSONLoggerTo(writer io.Writer) {
-	logger = levels.New(kitlog.NewJSONLogger(writer))
-	// This is to keep it consistent with the Json Logger
-	logger = logger.With("ats", kitlog.DefaultTimestampUTC)
+	l := jsonLoggerTo(writer)
+	// cloudwatch takes the first instance of a timestamp matching the format.
+	// the json logger sorts alphabetically, so this ensures its first
+	l = l.With("aaats", kitlog.DefaultTimestampUTC)
+	SetupGlobalLoggerTo(l)
+}
+
+// Public initialization function to set a logger global.
+func SetupGlobalLoggerTo(inLogger levels.Levels) {
+	logger = inLogger
 }
 
 // Log a message to Info, with optional keyvalues
@@ -62,6 +67,14 @@ func LogError(keyvals ...interface{}) {
 // Sets standard fields on the logger, for all calls
 func SetStandardFields(keyvals ...interface{}) {
 	logger = logger.With(encodeCompoundValues(keyvals...)...)
+}
+
+func jsonLoggerTo(writer io.Writer) levels.Levels {
+	return levels.New(kitlog.NewJSONLogger(writer))
+}
+
+func logfmtLoggerTo(writer io.Writer) levels.Levels {
+	return levels.New(kitlog.NewLogfmtLogger(writer))
 }
 
 // Encode compound values using %+v. To use a custom encoding, use a type that implements fmt.Stringer
