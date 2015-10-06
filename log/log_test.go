@@ -3,24 +3,22 @@ package log_test
 import (
 	"bytes"
 	"fmt"
+	"regexp"
 	"testing"
-	"time"
 
 	"github.com/intercom/gocore/log"
 )
 
-var testTime = time.Now().UTC().Format(time.RFC3339)
-
 func TestLogInfo(t *testing.T) {
 	buf := logWithBuffer()
-	log.LogInfo(testTime, "foo", "bar")
-	checkLogFormatMatches(t, fmt.Sprintf("level=info time=%s foo=bar\n", testTime), buf)
+	log.LogInfo("foo", "bar")
+	CheckLogFormatIgnoreTimestamp(t, `level=info ats=\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ foo=bar\n`, buf)
 }
 
 func TestLogInfoWithOneValueBecomesMessage(t *testing.T) {
 	buf := logWithBuffer()
-	log.LogInfo(testTime, "foo")
-	checkLogFormatMatches(t, fmt.Sprintf("level=info time=%s msg=foo\n", testTime), buf)
+	log.LogInfo("foo")
+	checkLogFormatMatches(t, "level=info msg=foo\n", buf)
 }
 
 func TestLogInfoMessage(t *testing.T) {
@@ -43,20 +41,20 @@ func TestLogErrorMessageWithExtra(t *testing.T) {
 
 func TestLogInfoWithCompoundTypeArray(t *testing.T) {
 	buf := logWithBuffer()
-	log.LogInfo(testTime, "key", []string{"foo", "bar"})
-	checkLogFormatMatches(t, fmt.Sprintf("level=info time=%s key=\"[foo bar]\"\n", testTime), buf)
+	log.LogInfo("key", []string{"foo", "bar"})
+	checkLogFormatMatches(t, "level=info key=\"[foo bar]\"\n", buf)
 }
 
 func TestLogInfoWithCompoundTypeMap(t *testing.T) {
 	buf := logWithBuffer()
-	log.LogInfo(testTime, "key", map[string]interface{}{"another": 12})
-	checkLogFormatMatches(t, fmt.Sprintf("level=info time=%s key=map[another:12]\n", testTime), buf)
+	log.LogInfo("key", map[string]interface{}{"another": 12})
+	checkLogFormatMatches(t, "level=info key=map[another:12]\n", buf)
 }
 
 func TestLogInfoWithCompoundTypeStruct(t *testing.T) {
 	buf := logWithBuffer()
-	log.LogInfo(testTime, "key", testTypeNotStringer{"foo"}, "bar", testTypeStringer{"bar"})
-	checkLogFormatMatches(t, fmt.Sprintf("level=info time=%s key={Foo:foo} bar=bar\n", testTime), buf)
+	log.LogInfo("key", testTypeNotStringer{"foo"}, "bar", testTypeStringer{"bar"})
+	checkLogFormatMatches(t, "level=info key={Foo:foo} bar=bar\n", buf)
 }
 
 func TestLogWithStandardFields(t *testing.T) {
@@ -87,6 +85,18 @@ func logWithBuffer() *bytes.Buffer {
 func checkLogFormatMatches(t *testing.T, want string, buf *bytes.Buffer) {
 	have := buf.String()
 	if want != have {
+		t.Errorf("want %#v, have %#v", want, have)
+	}
+	buf.Reset()
+}
+
+func CheckLogFormatIgnoreTimestamp(t *testing.T, want string, buf *bytes.Buffer) {
+	have := buf.String()
+	var regexLine = regexp.MustCompile(want)
+	fmt.Println(have)
+	fmt.Println(regexLine)
+	fmt.Println(regexLine.FindStringSubmatch(want))
+	if regexLine.MatchString(have) {
 		t.Errorf("want %#v, have %#v", want, have)
 	}
 	buf.Reset()
