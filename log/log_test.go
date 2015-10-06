@@ -3,8 +3,6 @@ package log
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
-	"regexp"
 	"testing"
 	"time"
 )
@@ -101,18 +99,6 @@ func logWithBuffer() *bytes.Buffer {
 func checkLogFormatMatches(t *testing.T, want string, buf *bytes.Buffer) {
 	have := buf.String()
 	if want != have {
-		t.Errorf("want %#v, have %#v", want, have)
-	}
-	buf.Reset()
-}
-
-func checkLogFormatIgnoreTimestamp(t *testing.T, want string, buf *bytes.Buffer) {
-	have := buf.String()
-	var regexLine = regexp.MustCompile(want)
-	fmt.Println(have)
-	fmt.Println(regexLine)
-	fmt.Println(regexLine.FindStringSubmatch(want))
-	if !regexLine.MatchString(have) {
 		t.Errorf("want %#v, have %#v", want, have)
 	}
 	buf.Reset()
