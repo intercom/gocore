@@ -88,7 +88,3 @@ func encodeCompoundValues(keyvals ...interface{}) []interface{} {
 func init() {
 	logger = levels.New(kitlog.NewNopLogger())
 }
-
-func currentTime() string {
-	return time.Now().UTC().Format(time.RFC3339)
-}

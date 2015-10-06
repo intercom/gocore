@@ -12,7 +12,7 @@ import (
 func TestLogInfo(t *testing.T) {
 	buf := logWithBuffer()
 	log.LogInfo("foo", "bar")
-	CheckLogFormatIgnoreTimestamp(t, `level=info ats=\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ foo=bar\n`, buf)
+	CheckLogFormatIgnoreTimestamp(t, `level=info ats=\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ foo=bar`, buf)
 }
 
 func TestLogInfoWithOneValueBecomesMessage(t *testing.T) {
