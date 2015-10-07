@@ -17,14 +17,25 @@ var (
 // Logfmt format.
 // This should be called before any goroutines using the logger are started
 func SetupLogFmtLoggerTo(writer io.Writer) {
-	logger = levels.New(kitlog.NewLogfmtLogger(writer))
+	l := logfmtLoggerTo(writer)
+	l = l.With("aaats", kitlog.DefaultTimestampUTC)
+	SetupGlobalLoggerTo(l)
 }
 
 // Public initialization function to initialize the logger global.
 // JSON format.
 // This should be called before any goroutines using the logger are started
 func SetupJSONLoggerTo(writer io.Writer) {
-	logger = levels.New(kitlog.NewJSONLogger(writer))
+	l := jsonLoggerTo(writer)
+	// cloudwatch takes the first instance of a timestamp matching the format.
+	// the json logger sorts alphabetically, so this ensures its first
+	l = l.With("aaats", kitlog.DefaultTimestampUTC)
+	SetupGlobalLoggerTo(l)
+}
+
+// Public initialization function to set a logger global.
+func SetupGlobalLoggerTo(inLogger levels.Levels) {
+	logger = inLogger
 }
 
 // Log a message to Info, with optional keyvalues
@@ -56,6 +67,14 @@ func LogError(keyvals ...interface{}) {
 // Sets standard fields on the logger, for all calls
 func SetStandardFields(keyvals ...interface{}) {
 	logger = logger.With(encodeCompoundValues(keyvals...)...)
+}
+
+func jsonLoggerTo(writer io.Writer) levels.Levels {
+	return levels.New(kitlog.NewJSONLogger(writer))
+}
+
+func logfmtLoggerTo(writer io.Writer) levels.Levels {
+	return levels.New(kitlog.NewLogfmtLogger(writer))
 }
 
 // Encode compound values using %+v. To use a custom encoding, use a type that implements fmt.Stringer
