@@ -68,8 +68,7 @@ func TestLogWithStandardFields(t *testing.T) {
 
 func TestJSONLog(t *testing.T) {
 	buf := bytes.Buffer{}
-
-	SetupGlobalLoggerTo(jsonLoggerTo(&buf))
+	GlobalLogger = JSONLoggerTo(&buf)
 	LogInfoMessage("something", "key", 4)
 	checkLogFormatMatches(t, "{\"key\":4,\"level\":\"info\",\"msg\":\"something\"}\n", &buf)
 }
@@ -92,7 +91,7 @@ func TestJSONLogWithTimestamp(t *testing.T) {
 
 func logWithBuffer() *bytes.Buffer {
 	buf := bytes.Buffer{}
-	SetupGlobalLoggerTo(logfmtLoggerTo(&buf))
+	GlobalLogger = LogfmtLoggerTo(&buf)
 	return &buf
 }
 
