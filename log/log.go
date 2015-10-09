@@ -10,32 +10,27 @@ import (
 )
 
 var (
-	logger levels.Levels // level based logger
+	GlobalLogger levels.Levels // level based logger
 )
 
 // Public initialization function to initialize the logger global.
 // Logfmt format.
 // This should be called before any goroutines using the logger are started
 func SetupLogFmtLoggerTo(writer io.Writer) {
-	l := logfmtLoggerTo(writer)
+	l := LogfmtLoggerTo(writer)
 	l = l.With("aaats", kitlog.DefaultTimestampUTC)
-	SetupGlobalLoggerTo(l)
+	GlobalLogger = l
 }
 
 // Public initialization function to initialize the logger global.
 // JSON format.
 // This should be called before any goroutines using the logger are started
 func SetupJSONLoggerTo(writer io.Writer) {
-	l := jsonLoggerTo(writer)
+	l := JSONLoggerTo(writer)
 	// cloudwatch takes the first instance of a timestamp matching the format.
 	// the json logger sorts alphabetically, so this ensures its first
 	l = l.With("aaats", kitlog.DefaultTimestampUTC)
-	SetupGlobalLoggerTo(l)
-}
-
-// Public initialization function to set a logger global.
-func SetupGlobalLoggerTo(inLogger levels.Levels) {
-	logger = inLogger
+	GlobalLogger = l
 }
 
 // Log a message to Info, with optional keyvalues
@@ -53,7 +48,7 @@ func LogInfo(keyvals ...interface{}) {
 	if len(keyvals) == 1 {
 		keyvals = []interface{}{"msg", keyvals[0]}
 	}
-	logger.Info(encodeCompoundValues(keyvals...)...)
+	GlobalLogger.Info(encodeCompoundValues(keyvals...)...)
 }
 
 // Log a series of key, values to Error
@@ -61,19 +56,19 @@ func LogError(keyvals ...interface{}) {
 	if len(keyvals) == 1 {
 		keyvals = []interface{}{"msg", keyvals[0]}
 	}
-	logger.Error(encodeCompoundValues(keyvals...)...)
+	GlobalLogger.Error(encodeCompoundValues(keyvals...)...)
 }
 
 // Sets standard fields on the logger, for all calls
 func SetStandardFields(keyvals ...interface{}) {
-	logger = logger.With(encodeCompoundValues(keyvals...)...)
+	GlobalLogger = GlobalLogger.With(encodeCompoundValues(keyvals...)...)
 }
 
-func jsonLoggerTo(writer io.Writer) levels.Levels {
+func JSONLoggerTo(writer io.Writer) levels.Levels {
 	return levels.New(kitlog.NewJSONLogger(writer))
 }
 
-func logfmtLoggerTo(writer io.Writer) levels.Levels {
+func LogfmtLoggerTo(writer io.Writer) levels.Levels {
 	return levels.New(kitlog.NewLogfmtLogger(writer))
 }
 
@@ -99,5 +94,5 @@ func encodeCompoundValues(keyvals ...interface{}) []interface{} {
 // Initializes it to a no-op implementation;
 // later calls can replace it by calling SetupLogger.
 func init() {
-	logger = levels.New(kitlog.NewNopLogger())
+	GlobalLogger = levels.New(kitlog.NewNopLogger())
 }
