@@ -30,6 +30,13 @@ func TestGetStatsdMetric(t *testing.T) {
 	metrics.IncrementCount("countMetric")
 }
 
+func TestGetMultiStatsdMetric(t *testing.T) {
+	sd, _ := metrics.NewMultiStatsdRecorder([]string{"127.0.0.1:8888", "127.0.0.1:8889"}, "namespace")
+	sd.IncrementCount("countMetric") // doesn't panic
+	metrics.SetMetricsGlobal(sd)
+	metrics.IncrementCount("countMetric")
+}
+
 type TestRecorder struct {
 	metrics map[string]interface{}
 }
