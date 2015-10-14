@@ -1,16 +1,16 @@
 ### GoCore
 
-A library with a set of standardised functions for applications written in Go at Intercom.
+A library with a set of standardized functions for applications written in Go at Intercom.
 
 To use:
 
 Checkout into your gopath.
 
-Vendor it into your project, making sure dependencies are satisified (GoCore does not vendor it's own dependencies)
+Vendor it into your project, making sure dependencies are satisfied (GoCore does not vendor it's own dependencies)
 
 #### Logs
 
-Structured logs in standard LogFmt format, with levels.
+Structured logs in standard LogFmt or JSON format, with levels.
 
 ```go
 
