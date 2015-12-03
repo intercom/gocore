@@ -44,6 +44,8 @@ func (m *StatsdRecorder) SetGauge(metricName string, val float32) {
 	m.Metrics.SetGauge(m.prefixedMetricName(metricName), val)
 }
 
+func (m *StatsdRecorder) WithTag(key, value string) MetricsRecorder { return m }
+
 func (m *StatsdRecorder) SetPrefix(prefix string) {
 	m.prefix = prefix
 }
