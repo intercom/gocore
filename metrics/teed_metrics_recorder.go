@@ -42,10 +42,9 @@ func (t *TeedMetricsRecorder) SetPrefix(prefix string) {
 }
 
 func (t *TeedMetricsRecorder) WithTag(key, value string) MetricsRecorder {
-	newRecorder := TeedMetricsRecorder{prefix: t.prefix}
-	newMetrics := []MetricsRecorder{}
+	newRecorder := TeedMetricsRecorder{prefix: t.prefix, metrics: []MetricsRecorder{}}
 	for _, m := range t.metrics {
-		newMetrics = append(newMetrics, m.WithTag(key, value))
+		newRecorder.metrics = append(newRecorder.metrics, m.WithTag(key, value))
 	}
 	return &newRecorder
 }
