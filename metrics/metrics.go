@@ -12,6 +12,7 @@ type MetricsRecorder interface {
 	MeasureSince(metricName string, since time.Time)
 	SetGauge(metricName string, val float32)
 	SetPrefix(prefix string)
+	WithTag(key, value string) MetricsRecorder
 }
 
 // Package-level default initialization of the Metrics global.

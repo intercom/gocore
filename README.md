@@ -70,6 +70,19 @@ func main() {
 }
 ```
 
+##### Datadog statsd recorder
+
+```go
+recorder, _ = metrics.NewDatadogStatsdRecorder("127.0.0.1:8125", "namespace", "hostname")
+
+// individually tagged calls
+recorder.WithTag("tagkey", "tagvalue").IncrementCount("metricName")
+
+// re-use a tagged recorder
+tagged := recorder.WithTag("tagkey", "tagvalue")
+tagged.MeasureSince("metricName", time.Now())
+```
+
 To add a new recorder, implement the MetricsRecorder interface.
 
 #### Monitoring
