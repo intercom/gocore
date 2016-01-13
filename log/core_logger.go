@@ -22,14 +22,14 @@ func (cl *CoreLogger) LogInfo(keyvals ...interface{}) {
 	if len(keyvals) == 1 {
 		keyvals = []interface{}{"msg", keyvals[0]}
 	}
-	cl.Levels.Info(encodeCompoundValues(keyvals...)...)
+	cl.Levels.Info().Log(encodeCompoundValues(keyvals...)...)
 }
 
 func (cl *CoreLogger) LogError(keyvals ...interface{}) {
 	if len(keyvals) == 1 {
 		keyvals = []interface{}{"msg", keyvals[0]}
 	}
-	cl.Levels.Error(encodeCompoundValues(keyvals...)...)
+	cl.Levels.Error().Log(encodeCompoundValues(keyvals...)...)
 }
 
 func (cl *CoreLogger) SetStandardFields(keyvals ...interface{}) {
