@@ -38,31 +38,64 @@ func NewDatadogStatsdRecorder(statsiteEndpoint, namespace, hostname string) (*Da
 	return &DatadogStatsdRecorder{StatsdRecorder: &StatsdRecorder{m, ""}, sink: sink, tags: []string{}}, nil
 }
 
-func (t *DatadogStatsdRecorder) IncrementCount(metricName string) {
-	t.sink.IncrCounterWithTags(t.prefixedMetricName(metricName), 1, t.tags)
+func (dd *DatadogStatsdRecorder) IncrementCount(metricName string) {
+	dd.IncrementCountBy(metricName, 1)
 }
 
-func (t *DatadogStatsdRecorder) IncrementCountBy(metricName string, amount int) {
-	t.sink.IncrCounterWithTags(t.prefixedMetricName(metricName), float32(amount), t.tags)
+func (dd *DatadogStatsdRecorder) IncrementCountBy(metricName string, amount int) {
+	dd.sink.IncrCounterWithTags(
+		dd.withPrefixAndServiceName(metricName, "counter"),
+		float32(amount),
+		dd.tags,
+	)
 }
 
-func (t *DatadogStatsdRecorder) MeasureSince(metricName string, since time.Time) {
+func (dd *DatadogStatsdRecorder) MeasureSince(metricName string, since time.Time) {
 	now := time.Now()
 	elapsed := now.Sub(since)
 	msec := float32(elapsed.Nanoseconds()) / float32(time.Millisecond)
-	t.sink.AddSampleWithTags(t.prefixedMetricName(metricName), msec, t.tags)
+
+	dd.sink.AddSampleWithTags(
+		dd.withPrefixAndServiceName(metricName, "timer"),
+		msec,
+		dd.tags,
+	)
 }
 
-func (t *DatadogStatsdRecorder) SetGauge(metricName string, val float32) {
-	t.sink.SetGaugeWithTags(t.prefixedMetricName(metricName), val, t.tags)
+func (dd *DatadogStatsdRecorder) SetGauge(metricName string, val float32) {
+	dd.sink.SetGaugeWithTags(
+		dd.withPrefixAndServiceName(metricName, "gauge"),
+		val,
+		dd.tags,
+	)
 }
 
 // WithTag returns a new DatadogStatsdRecorder that has the tags added to it.
-func (t *DatadogStatsdRecorder) WithTag(key, value string) MetricsRecorder {
-	t.tags = append(t.tags, flatKey(key, value))
-	return &DatadogStatsdRecorder{StatsdRecorder: t.StatsdRecorder, sink: t.sink, tags: t.tags}
+func (dd *DatadogStatsdRecorder) WithTag(key, value string) MetricsRecorder {
+	dd.tags = append(dd.tags, flatKey(key, value))
+	return &DatadogStatsdRecorder{StatsdRecorder: dd.StatsdRecorder, sink: dd.sink, tags: dd.tags}
 }
 
-func (t *DatadogStatsdRecorder) GetTags() []string {
-	return t.tags
+func (dd *DatadogStatsdRecorder) GetTags() []string {
+	return dd.tags
+}
+
+// adds prefix, service name prefix, and type prefix
+func (dd *DatadogStatsdRecorder) withPrefixAndServiceName(metricName, typeStr string) []string {
+	key := dd.prefixedMetricName(metricName)
+	if dd.StatsdRecorder.Metrics.EnableTypePrefix {
+		key = insert(0, typeStr, key)
+	}
+	if dd.StatsdRecorder.Metrics.ServiceName != "" {
+		key = insert(0, dd.StatsdRecorder.Metrics.ServiceName, key)
+	}
+	return key
+}
+
+// Inserts a string value at an index into the slice
+func insert(i int, v string, s []string) []string {
+	s = append(s, "")
+	copy(s[i+1:], s[i:])
+	s[i] = v
+	return s
 }

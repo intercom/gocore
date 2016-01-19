@@ -1,6 +1,7 @@
 package metrics_test
 
 import (
+	"net"
 	"testing"
 	"time"
 
@@ -28,4 +29,52 @@ func TestDatadogStatsdMultiTags(t *testing.T) {
 		t.Errorf("want %#v tag, have %#v tag", want, have)
 	}
 
+}
+
+const (
+	DogStatsdAddr = "127.0.0.1:7254"
+)
+
+func mockNewDogStatsdSink(addr string, tags []string, tagWithHostname bool) *metrics.DatadogStatsdRecorder {
+	dog, _ := metrics.NewDatadogStatsdRecorder(addr, "namespace", "hostname")
+	return dog
+}
+
+func setupTestServerAndBuffer(t *testing.T) (*net.UDPConn, []byte) {
+	udpAddr, err := net.ResolveUDPAddr("udp", DogStatsdAddr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	server, err := net.ListenUDP("udp", udpAddr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return server, make([]byte, 1024)
+}
+
+func TestDogStatsdSink(t *testing.T) {
+	server, buf := setupTestServerAndBuffer(t)
+	defer server.Close()
+
+	dog := mockNewDogStatsdSink(DogStatsdAddr, []string{}, false)
+	dog.IncrementCountBy("counter", 4)
+	assertServerMatchesExpected(t, server, buf, "namespace.counter:4|c")
+}
+
+func TestDogStatsdSinkWithTag(t *testing.T) {
+	server, buf := setupTestServerAndBuffer(t)
+	defer server.Close()
+
+	dog := mockNewDogStatsdSink(DogStatsdAddr, []string{}, false)
+	tagged := dog.WithTag("tagkey", "tagvalue")
+	tagged.IncrementCountBy("counter", 4)
+	assertServerMatchesExpected(t, server, buf, "namespace.counter:4|c|#tagkey:tagvalue")
+}
+
+func assertServerMatchesExpected(t *testing.T, server *net.UDPConn, buf []byte, expected string) {
+	n, _ := server.Read(buf)
+	msg := buf[:n]
+	if string(msg) != expected {
+		t.Fatalf("Line %s does not match expected: %s", string(msg), expected)
+	}
 }
