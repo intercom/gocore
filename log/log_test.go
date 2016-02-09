@@ -66,6 +66,18 @@ func TestLogWithStandardFields(t *testing.T) {
 	checkLogFormatMatches(t, "level=info foo=bar key=4 msg=something\n", buf)
 }
 
+func TestLogWithStandardFieldsMakesNewLogger(t *testing.T) {
+	buf := bytes.Buffer{}
+	logger := LogfmtLoggerTo(&buf)
+	l2 := logger.SetStandardFields("foo", "bar")
+
+	logger.LogErrorMessage("uh oh")
+	checkLogFormatMatches(t, "level=error msg=\"uh oh\"\n", &buf)
+
+	l2.LogErrorMessage("uh oh")
+	checkLogFormatMatches(t, "level=error foo=bar msg=\"uh oh\"\n", &buf)
+}
+
 func TestJSONLog(t *testing.T) {
 	buf := bytes.Buffer{}
 	GlobalLogger = JSONLoggerTo(&buf)
@@ -77,6 +89,8 @@ func TestJSONLogWithTimestamp(t *testing.T) {
 	buf := bytes.Buffer{}
 
 	SetupJSONLoggerTo(&buf)
+	UseTimestamp(true)
+
 	LogInfoMessage("something", "key", 4)
 	tsl := timestampedLog{}
 	json.Unmarshal(buf.Bytes(), &tsl)
@@ -104,7 +118,7 @@ func checkLogFormatMatches(t *testing.T, want string, buf *bytes.Buffer) {
 }
 
 type timestampedLog struct {
-	Timestamp time.Time `json:"aaats"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 type testTypeNotStringer struct {
