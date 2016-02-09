@@ -36,6 +36,9 @@ func main() {
 
   // setting standard fields
   corelog.SetStandardFields("instance_id", "67daf")
+  
+  // enabling timestamp
+  corelog.UseTimestamp(true)
 }
 ```
 

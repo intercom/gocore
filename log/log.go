@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-	"time"
 
 	kitlog "github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/levels"
@@ -19,7 +18,6 @@ var (
 // This should be called before any goroutines using the logger are started
 func SetupLogFmtLoggerTo(writer io.Writer) {
 	l := LogfmtLoggerTo(writer)
-	l.SetStandardFields("aaats", defaultTimeUTC())
 	GlobalLogger = l
 }
 
@@ -28,9 +26,6 @@ func SetupLogFmtLoggerTo(writer io.Writer) {
 // This should be called before any goroutines using the logger are started
 func SetupJSONLoggerTo(writer io.Writer) {
 	l := JSONLoggerTo(writer)
-	// cloudwatch takes the first instance of a timestamp matching the format.
-	// the json logger sorts alphabetically, so this ensures its first
-	l.SetStandardFields("aaats", defaultTimeUTC())
 	GlobalLogger = l
 }
 
@@ -56,7 +51,12 @@ func LogError(keyvals ...interface{}) {
 
 // Sets standard fields on the logger, for all calls
 func SetStandardFields(keyvals ...interface{}) {
-	GlobalLogger.SetStandardFields(keyvals...)
+	GlobalLogger = GlobalLogger.SetStandardFields(keyvals...)
+}
+
+// Set whether a timestamp field is added to each log message
+func UseTimestamp(shouldUse bool) {
+	GlobalLogger.useTimestamp = true
 }
 
 func JSONLoggerTo(writer io.Writer) *CoreLogger {
@@ -65,6 +65,10 @@ func JSONLoggerTo(writer io.Writer) *CoreLogger {
 
 func LogfmtLoggerTo(writer io.Writer) *CoreLogger {
 	return NewCoreLogger(levels.New(kitlog.NewLogfmtLogger(writer)))
+}
+
+func NoopLogger() *CoreLogger {
+	return NewCoreLogger(levels.New(kitlog.NewNopLogger()))
 }
 
 // Encode compound values using %+v. To use a custom encoding, use a type that implements fmt.Stringer
@@ -85,13 +89,9 @@ func encodeCompoundValues(keyvals ...interface{}) []interface{} {
 	return keyvals
 }
 
-func defaultTimeUTC() string {
-	return time.Now().UTC().Format(time.RFC3339)
-}
-
 // Package-level default initialization of the logger.
 // Initializes it to a no-op implementation;
 // later calls can replace it by calling SetupLogger.
 func init() {
-	GlobalLogger = NewCoreLogger(levels.New(kitlog.NewNopLogger()))
+	GlobalLogger = NoopLogger()
 }
