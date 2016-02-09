@@ -114,6 +114,70 @@ func main() {
 }
 ```
 
+#### API
+
+The coreapi package ties together the other packages into a set of useful behaviours for constructing API's wired with per-request loggers, metrics and monitoring.
+
+
+```go
+import "github.com/intercom/gocore/coreapi"
+
+func main()  {
+	// setup the ServeMux with default logger, recorder, and monitor
+	logger := log.LogfmtLoggerTo(os.Stderr)
+	recorder, _ := metrics.NewDatadogStatsdRecorder("127.0.0.1:8888", "myservice", "hostname")
+	sentryMonitor, _ := monitoring.NewSentryMonitor("sentryDSN")
+	mux := coreapi.ServeMuxWithDefaults(logger, recorder, sentryMonitor)
+	
+	// handle a request to /user, 
+	mux.Handle("/user", User)
+	
+	// or use some middleware
+	auth := &api.BasicAuth{User: "user", Pass: "password"}
+	mux.Handle("/auth_user", auth.Protect(User))
+	
+	// listen and serve
+	mux.ListenAndServe("host", "port")
+}
+
+// our ContextHandlerFunc handler
+func User(ctx *coreapi.ContextHandler, w http.ResponseWriter, r *http.Request) {
+	ctx.Logger.LogErrorMessage("message") // we have access to a request-scoped logger, which has the path and request id already set
+	ctx.Metrics.IncrementCount("request_count") // automatically tagged with this url.
+	ctx.Monitor.CaptureException(errors.New("something went wrong"))
+}
+
+```
+
+There's also some handy Response objects, that can be used to write formatted data using the http.ResponseWriter.
+
+```go
+func User(ctx *coreapi.ContextHandler, w http.ResponseWriter, r *http.Request) {
+	// json response
+	coreapi.JSONResponse(200, &UserResponse{Name: "Foo", Email: "foo@bar.com"}).WriteTo(w)
+	
+	// or json error
+	coreapi.JSONErrorResponse(400, errors.New("bad error :(")).WriteTo(w)
+}
+
+type UserResponse struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+``` 
+
+Building middleware is also straightforward:
+
+```go
+func MyMiddleware(next coreapi.ContextHandlerFunc) coreapi.ContextHandlerFunc {
+	return ContextHandlerFunc(func(ctx *ContextHandler, w http.ResponseWriter, r *http.Request) {
+		ctx.Logger.LogInfoMessage("middleware woz ere")
+		next(ctx, w, r)
+	})
+}
+```
+
+
 #### Dependencies
 
 GoKit Log, Levels:
