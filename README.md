@@ -1,4 +1,4 @@
-### GoCore
+### GoCore [![codebeat](https://codebeat.co/badges/f5bec192-65f8-4f4a-a16d-b3f2689e9c4c)](https://codebeat.co/projects/github-com-intercom-gocore)
 
 A library with a set of standardized functions for applications written in Go at Intercom.
 
