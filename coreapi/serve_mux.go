@@ -11,7 +11,7 @@ import (
 
 // ServeMux handles requests matching a given pattern, and routes them appropriately
 type ServeMux struct {
-	*http.ServeMux
+	mux     *http.ServeMux
 	logger  *log.CoreLogger
 	metrics metrics.MetricsRecorder
 	monitor monitoring.Monitor
@@ -22,21 +22,22 @@ type ServeMux struct {
 func ServeMuxWithDefaults(logger *log.CoreLogger, metrics metrics.MetricsRecorder, monitor monitoring.Monitor) *ServeMux {
 	logger.UseTimestamp(true) // we always want timestamp fields
 	return &ServeMux{
-		ServeMux: http.NewServeMux(),
-		logger:   logger,
-		metrics:  metrics,
-		monitor:  monitor,
+		mux:     http.NewServeMux(),
+		logger:  logger,
+		metrics: metrics,
+		monitor: monitor,
 	}
 }
 
 // Handle a pattern match, sending to a ContextHandlerFunc
 func (bh *ServeMux) Handle(pattern string, f ContextHandlerFunc) {
-	bh.ServeMux.Handle(pattern, bh.EndpointFor(pattern, f))
+	bh.mux.Handle(pattern, bh.EndpointFor(pattern, f))
 }
 
 // ListenAndServe on the ServeMux
 func (bh *ServeMux) ListenAndServe(host, port string) {
-	http.ListenAndServe(fmt.Sprintf("%s:%s", host, port), bh.ServeMux)
+	handler := http.HandlerFunc(bh.mux.ServeHTTP)
+	http.ListenAndServe(fmt.Sprintf("%s:%s", host, port), handler)
 }
 
 // EndpointFor generates a ContextEndpoint that for a pattern, that has per-endpoint logging, metrics and monitoring
