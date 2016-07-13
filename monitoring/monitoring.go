@@ -28,5 +28,5 @@ func CaptureException(err error) {
 
 // Capture an exception with tags
 func CaptureExceptionWithTags(err error, tags ...interface{}) {
-	globalMonitor.CaptureExceptionWithTags(err, tags)
+	globalMonitor.CaptureExceptionWithTags(err, tags...)
 }
