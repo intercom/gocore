@@ -1,6 +1,7 @@
 package coreapi
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,8 +11,6 @@ import (
 	"github.com/intercom/gocore/metrics"
 	"github.com/intercom/gocore/monitoring"
 	"github.com/pborman/uuid"
-
-	"golang.org/x/net/context"
 )
 
 // ContextHandlerFunc is the signature of API handlers that use this system.
@@ -28,9 +27,21 @@ type ContextHandler struct {
 	handlerFunc ContextHandlerFunc
 }
 
+// StatusWrappingResponseWriter wraps a http.ResponseWriter, overriding WriteHeader to keep
+// a record of the Status set.
+type StatusWrappingResponseWriter struct {
+	http.ResponseWriter
+	Status int
+}
+
+func (rw *StatusWrappingResponseWriter) WriteHeader(status int) {
+	rw.Status = status
+	rw.ResponseWriter.WriteHeader(status)
+}
+
 // ServeHTTP makes ContextHandler satisifies the http.Handler interface
 func (ch *ContextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ch.Context, ch.Cancel = context.WithCancel(context.Background())
+	ch.Context, ch.Cancel = context.WithCancel(r.Context())
 	ch.RequestID = uuid.New()
 	ch.Context = context.WithValue(ch.Context, "requestID", ch.RequestID)
 	ch.Logger = ch.Logger.SetStandardFields("requestID", ch.RequestID)
@@ -47,8 +58,9 @@ func (ch *ContextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			ch.Monitor.CaptureExceptionWithTags(err, "requestID", ctx.Value("requestID"), "endpoint", r.URL.String())
 			JSONErrorResponse(500, err).WriteTo(w)
 		}
-		ch.Cancel()
+		ch.Cancel() // cancel on error
 	}(ch.Context)
 
-	ch.handlerFunc(ch, w, r)
+	ch.handlerFunc(ch, &StatusWrappingResponseWriter{w, 0}, r)
+	ch.Cancel()
 }
