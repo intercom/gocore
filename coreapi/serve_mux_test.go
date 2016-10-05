@@ -2,11 +2,12 @@ package coreapi_test
 
 import (
 	"bytes"
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/intercom/gocore/coreapi"
 	"github.com/intercom/gocore/log"
@@ -16,7 +17,7 @@ import (
 
 func TestServeMux(t *testing.T) {
 	buf := bytes.Buffer{}
-	logger := log.LogfmtLoggerTo(&buf)
+	logger := log.JSONLoggerTo(&buf)
 	recorder, _ := metrics.NewDatadogStatsdRecorder("127.0.0.1:8888", "namespace", "hostname")
 
 	mux := coreapi.ServeMuxWithDefaults(logger, recorder, &monitoring.NoopMonitor{})
@@ -32,8 +33,7 @@ func TestServeMux(t *testing.T) {
 	if 200 != res.StatusCode {
 		t.Errorf("should have status %#v, have status %#v", 200, res.StatusCode)
 	}
-
-	checkLogFormatMatches(t, fmt.Sprintf("level=error url=/test requestID=%s msg=\"uh oh\"\n", handler.lastRequestID), &buf)
+	assertTimestampWithin(t, &buf)
 
 	tags := recorder.GetTags()
 	if want, have := "url:/test", tags[0]; want != have {
@@ -55,10 +55,18 @@ func (handler *TestHandler) testHandlerFunc(ctx *coreapi.ContextHandler, w http.
 	ctx.Logger.LogErrorMessage("uh oh")
 }
 
-func checkLogFormatMatches(t *testing.T, want string, buf *bytes.Buffer) {
-	have := buf.String()
-	if want != have {
-		t.Errorf("want %#v, have %#v", want, have)
+type timestampedLog struct {
+	Timestamp time.Time `json:"timestamp"`
+}
+
+func assertTimestampWithin(t *testing.T, buf *bytes.Buffer) {
+	tsl := timestampedLog{}
+	json.Unmarshal(buf.Bytes(), &tsl)
+	have := tsl.Timestamp.Unix()
+	want := time.Now().Unix()
+	difference := have - want
+	// fail unless we're within a second of...
+	if difference < -1 || difference > 1 {
+		t.Errorf("timestamp didnt match, have %v, want %v", have, want)
 	}
-	buf.Reset()
 }

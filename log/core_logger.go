@@ -39,11 +39,13 @@ func (cl *CoreLogger) LogError(keyvals ...interface{}) {
 
 func (cl *CoreLogger) SetStandardFields(keyvals ...interface{}) *CoreLogger {
 	encoded := encodeCompoundValues(keyvals...)
-	return NewCoreLogger(cl.Levels.With(encoded...))
+	newLogger := NewCoreLogger(cl.Levels.With(encoded...))
+	newLogger.UseTimestamp(cl.useTimestamp)
+	return newLogger
 }
 
 func (cl *CoreLogger) UseTimestamp(shouldUse bool) {
-	cl.useTimestamp = true
+	cl.useTimestamp = shouldUse
 }
 
 func (cl *CoreLogger) logTimestamp(keyvals []interface{}) []interface{} {
