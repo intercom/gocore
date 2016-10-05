@@ -37,6 +37,13 @@ func TestLogErrorMessageWithExtra(t *testing.T) {
 	checkLogFormatMatches(t, "level=error bar=7.6 msg=\"my message\"\n", buf)
 }
 
+func TestLogInfoMessageWithErrorLevel(t *testing.T) {
+	buf := logWithBuffer()
+	SetLevel(ERROR_LEVEL)
+	LogInfoMessage("my message", "bar", 7.6)
+	checkLogFormatMatches(t, "", buf)
+}
+
 func TestLogInfoWithCompoundTypeArray(t *testing.T) {
 	buf := logWithBuffer()
 	LogInfo("key", []string{"foo", "bar"})

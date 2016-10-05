@@ -9,10 +9,18 @@ import (
 type CoreLogger struct {
 	levels.Levels
 	useTimestamp bool
+	level        LogLevel
 }
 
+type LogLevel int
+
+const (
+	INFO_LEVEL LogLevel = iota
+	ERROR_LEVEL
+)
+
 func NewCoreLogger(l levels.Levels) *CoreLogger {
-	return &CoreLogger{Levels: l}
+	return &CoreLogger{Levels: l, level: INFO_LEVEL}
 }
 
 func (cl *CoreLogger) LogInfoMessage(message string, keyvalues ...interface{}) {
@@ -24,6 +32,9 @@ func (cl *CoreLogger) LogErrorMessage(message string, keyvalues ...interface{}) 
 }
 
 func (cl *CoreLogger) LogInfo(keyvals ...interface{}) {
+	if cl.level > INFO_LEVEL {
+		return
+	}
 	if len(keyvals) == 1 {
 		keyvals = []interface{}{"msg", keyvals[0]}
 	}
@@ -31,6 +42,9 @@ func (cl *CoreLogger) LogInfo(keyvals ...interface{}) {
 }
 
 func (cl *CoreLogger) LogError(keyvals ...interface{}) {
+	if cl.level > ERROR_LEVEL {
+		return
+	}
 	if len(keyvals) == 1 {
 		keyvals = []interface{}{"msg", keyvals[0]}
 	}
@@ -41,7 +55,12 @@ func (cl *CoreLogger) SetStandardFields(keyvals ...interface{}) *CoreLogger {
 	encoded := encodeCompoundValues(keyvals...)
 	newLogger := NewCoreLogger(cl.Levels.With(encoded...))
 	newLogger.UseTimestamp(cl.useTimestamp)
+	newLogger.SetLevel(cl.level)
 	return newLogger
+}
+
+func (cl *CoreLogger) SetLevel(level LogLevel) {
+	cl.level = level
 }
 
 func (cl *CoreLogger) UseTimestamp(shouldUse bool) {

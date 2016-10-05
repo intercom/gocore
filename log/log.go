@@ -54,9 +54,13 @@ func SetStandardFields(keyvals ...interface{}) {
 	GlobalLogger = GlobalLogger.SetStandardFields(keyvals...)
 }
 
+func SetLevel(level LogLevel) {
+	GlobalLogger.SetLevel(level)
+}
+
 // Set whether a timestamp field is added to each log message
 func UseTimestamp(shouldUse bool) {
-	GlobalLogger.useTimestamp = true
+	GlobalLogger.UseTimestamp(shouldUse)
 }
 
 func JSONLoggerTo(writer io.Writer) *CoreLogger {
