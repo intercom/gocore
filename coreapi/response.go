@@ -21,8 +21,10 @@ func (r *Response) WriteTo(out http.ResponseWriter) {
 		header[k] = v
 	}
 	out.WriteHeader(r.Status)
-	if _, err := out.Write(r.Body); err != nil {
-		panic(err) // can't write to response
+	if r.Body != nil && len(r.Body) > 0 {
+		if _, err := out.Write(r.Body); err != nil {
+			panic(err) // can't write to response
+		}
 	}
 }
 
@@ -48,6 +50,11 @@ func JSONErrorResponse(status int, err error) *Response {
 	res := JSONResponse(status, renderedError)
 	res.Error = err
 	return res
+}
+
+// EmptyResponse returns a Response object without a body
+func EmptyResponse(status int) *Response {
+	return &Response{Status: status, Header: make(http.Header)}
 }
 
 type errorResponse struct {

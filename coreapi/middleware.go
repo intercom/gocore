@@ -41,3 +41,17 @@ func (auth *BasicAuth) CheckBasicAuth(key, secret string) bool {
 	}
 	return true
 }
+
+// LogRequest logs the start and end of a request
+func LogRequest(next ContextHandlerFunc) ContextHandlerFunc {
+	return ContextHandlerFunc(func(ctx *ContextHandler, w http.ResponseWriter, r *http.Request) {
+		ctx.Logger.LogInfoMessage("request_started")
+		next(ctx, w, r)
+		switch v := w.(type) {
+		case *StatusWrappingResponseWriter:
+			ctx.Logger.LogInfoMessage("request_ended", "status", v.Status)
+		default:
+			ctx.Logger.LogInfoMessage("request_ended")
+		}
+	})
+}
