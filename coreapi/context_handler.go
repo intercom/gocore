@@ -39,6 +39,10 @@ func (rw *StatusWrappingResponseWriter) WriteHeader(status int) {
 	rw.ResponseWriter.WriteHeader(status)
 }
 
+func (rw *StatusWrappingResponseWriter) CloseNotify() <-chan bool {
+	return rw.CloseNotify()
+}
+
 // ServeHTTP makes ContextHandler satisifies the http.Handler interface
 func (ch *ContextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ch.Context, ch.Cancel = context.WithCancel(r.Context())
