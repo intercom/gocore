@@ -35,7 +35,7 @@ func TestServeMux(t *testing.T) {
 	}
 	assertTimestampWithin(t, &buf)
 
-	tags := recorder.GetTags()
+	tags := endpoint.Metrics().(*metrics.DatadogStatsdRecorder).GetTags()
 	if want, have := "url:/test", tags[0]; want != have {
 		t.Errorf("want first tag %#v, have %#v", want, have)
 	}

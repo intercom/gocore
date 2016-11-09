@@ -61,8 +61,8 @@ func TestDatadogStatsdMetricTags(t *testing.T) {
 func TestGetTeedMetricsRecorder(t *testing.T) {
 	dd, _ := metrics.NewDatadogStatsdRecorder("127.0.0.1:8125", "namespace", "hostname")
 	teed := metrics.NewTeedMetricsRecorder(dd)
-	teed.WithTag("key", "")
-	tags := (teed.GetMetrics()[0]).(*metrics.DatadogStatsdRecorder).GetTags()
+	tagged := teed.WithTag("key", "")
+	tags := (tagged.(*metrics.TeedMetricsRecorder).GetMetrics()[0]).(*metrics.DatadogStatsdRecorder).GetTags()
 
 	if want, have := "key", tags[0]; want != have {
 		t.Errorf("want %#v tag, have %#v tag", want, have)

@@ -19,16 +19,32 @@ func TestDatadogStatsdTagKeyValue(t *testing.T) {
 	}
 }
 
+func TestDatadogStatsdTagsMakeNewInstance(t *testing.T) {
+	recorder, _ := metrics.NewDatadogStatsdRecorder("127.0.0.1:8125", "namespace", "hostname")
+	tagged := recorder.WithTag("tagkey", "tagvalue")
+
+	if len(recorder.GetTags()) != 0 {
+		t.Error("modified old recorder")
+	}
+
+	if len(tagged.(*metrics.DatadogStatsdRecorder).GetTags()) != 1 {
+		t.Error("did not modify new recorder")
+	}
+}
+
 func TestDatadogStatsdMultiTags(t *testing.T) {
 	recorder, _ := metrics.NewDatadogStatsdRecorder("127.0.0.1:8125", "namespace", "hostname")
 	tagged := recorder.WithTag("tagkey", "tagvalue")
 	tagged = tagged.WithTag("anotherkey", "anothervalue")
 	tags := tagged.(*metrics.DatadogStatsdRecorder).GetTags()
 
-	if want, have := "anotherkey:anothervalue", tags[1]; want != have {
+	if want, have := "tagkey:tagvalue", tags[0]; want != have {
 		t.Errorf("want %#v tag, have %#v tag", want, have)
 	}
 
+	if want, have := "anotherkey:anothervalue", tags[1]; want != have {
+		t.Errorf("want %#v tag, have %#v tag", want, have)
+	}
 }
 
 const (
