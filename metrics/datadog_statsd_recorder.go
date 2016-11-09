@@ -72,8 +72,10 @@ func (dd *DatadogStatsdRecorder) SetGauge(metricName string, val float32) {
 
 // WithTag returns a new DatadogStatsdRecorder that has the tags added to it.
 func (dd *DatadogStatsdRecorder) WithTag(key, value string) MetricsRecorder {
-	dd.tags = append(dd.tags, flatKey(key, value))
-	return &DatadogStatsdRecorder{StatsdRecorder: dd.StatsdRecorder, sink: dd.sink, tags: dd.tags}
+	newRecorder := &DatadogStatsdRecorder{StatsdRecorder: dd.StatsdRecorder, sink: dd.sink, tags: []string{}}
+	newRecorder.tags = append(newRecorder.tags, dd.tags...)
+	newRecorder.tags = append(newRecorder.tags, flatKey(key, value))
+	return newRecorder
 }
 
 func (dd *DatadogStatsdRecorder) GetTags() []string {

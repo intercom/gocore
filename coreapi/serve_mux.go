@@ -68,3 +68,7 @@ func (endpoint *ContextEndpoint) ServeHTTP(w http.ResponseWriter, r *http.Reques
 	}
 	handler.ServeHTTP(w, r)
 }
+
+func (endpoint *ContextEndpoint) Metrics() metrics.MetricsRecorder {
+	return endpoint.metrics
+}
