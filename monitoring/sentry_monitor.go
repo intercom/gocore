@@ -11,7 +11,7 @@ type SentryMonitor struct {
 }
 
 func NewSentryMonitor(ravenDSN string) (*SentryMonitor, error) {
-	client, err := raven.NewClient(ravenDSN, nil)
+	client, err := raven.New(ravenDSN)
 	if err != nil {
 		return nil, err
 	}
@@ -19,7 +19,7 @@ func NewSentryMonitor(ravenDSN string) (*SentryMonitor, error) {
 }
 
 func (sm *SentryMonitor) CaptureException(err error) {
-	sm.ravenClient.CaptureErrorAndWait(err, map[string]string{}, raven.NewStacktrace(2, 3, nil))
+	sm.ravenClient.CaptureError(err, map[string]string{}, raven.NewStacktrace(2, 3, nil))
 }
 
 func (sm *SentryMonitor) CaptureExceptionWithTags(err error, tags ...interface{}) {

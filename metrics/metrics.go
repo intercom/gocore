@@ -10,6 +10,7 @@ type MetricsRecorder interface {
 	IncrementCount(metricName string)
 	IncrementCountBy(metricName string, amount int)
 	MeasureSince(metricName string, since time.Time)
+	MeasureDurationMS(metricName string, durationMS float32)
 	SetGauge(metricName string, val float32)
 	SetPrefix(prefix string)
 	WithTag(key, value string) MetricsRecorder

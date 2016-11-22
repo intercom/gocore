@@ -40,6 +40,10 @@ func (m *StatsdRecorder) MeasureSince(metricName string, since time.Time) {
 	m.Metrics.MeasureSince(m.prefixedMetricName(metricName), since)
 }
 
+func (m *StatsdRecorder) MeasureDurationMS(metricName string, durationMS float32) {
+	m.Metrics.AddSample(m.prefixedMetricName(metricName), durationMS)
+}
+
 func (m *StatsdRecorder) SetGauge(metricName string, val float32) {
 	m.Metrics.SetGauge(m.prefixedMetricName(metricName), val)
 }

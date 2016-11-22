@@ -9,6 +9,7 @@ type NoopRecorder struct{}
 func (*NoopRecorder) IncrementCount(string)                       {}
 func (*NoopRecorder) IncrementCountBy(string, int)                {}
 func (*NoopRecorder) MeasureSince(string, time.Time)              {}
+func (*NoopRecorder) MeasureDurationMS(string, float32)           {}
 func (*NoopRecorder) SetGauge(string, float32)                    {}
 func (*NoopRecorder) SetPrefix(string)                            {}
 func (n *NoopRecorder) WithTag(key, value string) MetricsRecorder { return n }

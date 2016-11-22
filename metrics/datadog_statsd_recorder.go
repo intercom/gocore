@@ -54,10 +54,13 @@ func (dd *DatadogStatsdRecorder) MeasureSince(metricName string, since time.Time
 	now := time.Now()
 	elapsed := now.Sub(since)
 	msec := float32(elapsed.Nanoseconds()) / float32(time.Millisecond)
+	dd.MeasureDurationMS(metricName, msec)
+}
 
+func (dd *DatadogStatsdRecorder) MeasureDurationMS(metricName string, durationMS float32) {
 	dd.sink.AddSampleWithTags(
 		dd.withPrefixAndServiceName(metricName, "timer"),
-		msec,
+		durationMS,
 		dd.tags,
 	)
 }
