@@ -13,6 +13,15 @@ var (
 	GlobalLogger *CoreLogger // level based logger
 )
 
+// Logger represents a logger with inheritable context
+type Logger interface {
+	LogInfoMessage(message string, keyvalues ...interface{})
+	LogErrorMessage(message string, keyvalues ...interface{})
+	LogInfo(keyvals ...interface{})
+	LogError(keyvals ...interface{})
+	With(keyvals ...interface{}) Logger
+}
+
 // Public initialization function to initialize the logger global.
 // Logfmt format.
 // This should be called before any goroutines using the logger are started
