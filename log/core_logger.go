@@ -44,6 +44,10 @@ func (cl *CoreLogger) SetStandardFields(keyvals ...interface{}) *CoreLogger {
 	return newLogger
 }
 
+func (cl *CoreLogger) With(keyvals ...interface{}) Logger {
+	return cl.SetStandardFields(keyvals...)
+}
+
 func (cl *CoreLogger) UseTimestamp(shouldUse bool) {
 	cl.useTimestamp = shouldUse
 }
