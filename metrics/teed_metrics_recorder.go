@@ -29,6 +29,12 @@ func (t *TeedMetricsRecorder) MeasureSince(metricName string, since time.Time) {
 	}
 }
 
+func (t *TeedMetricsRecorder) MeasureDurationMS(metricName string, durationMS float32) {
+	for _, m := range t.metrics {
+		m.MeasureDurationMS(metricName, durationMS)
+	}
+}
+
 func (t *TeedMetricsRecorder) SetGauge(metricName string, val float32) {
 	for _, m := range t.metrics {
 		m.SetGauge(metricName, val)

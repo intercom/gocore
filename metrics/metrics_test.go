@@ -87,6 +87,7 @@ func (tr *TestRecorder) IncrementCountBy(metricName string, val int) {
 
 // noops
 func (tr *TestRecorder) MeasureSince(string, time.Time)                    {}
+func (tr *TestRecorder) MeasureDurationMS(string, float32)                 {}
 func (tr *TestRecorder) SetGauge(string, float32)                          {}
 func (tr *TestRecorder) SetPrefix(string)                                  {}
 func (tr *TestRecorder) WithTag(key, value string) metrics.MetricsRecorder { return tr }
