@@ -62,23 +62,24 @@ func TestLogWithStandardFields(t *testing.T) {
 	LogErrorMessage("uh oh")
 	checkLogFormatMatches(t, "level=error foo=bar msg=\"uh oh\"\n", buf)
 
+	SetStandardFields("zap", "zam")
 	LogInfoMessage("something", "key", 4)
-	checkLogFormatMatches(t, "level=info foo=bar key=4 msg=something\n", buf)
+	checkLogFormatMatches(t, "level=info foo=bar zap=zam key=4 msg=something\n", buf)
 }
 
 func TestLogWithStandardFieldsAndTimestamp(t *testing.T) {
 	buf := bytes.Buffer{}
-	SetupJSONLoggerTo(&buf)
+	log := JSONLoggerTo(&buf)
 
-	UseTimestamp(true)
-	SetStandardFields("foo", "bar")
-	LogErrorMessage("uh oh")
+	log.SetStandardFields("foo", "bar")
+	log.LogErrorMessage("uh oh")
 	assertTimestampWithin(t, &buf)
 }
 
 func TestLogWithStandardFieldsMakesNewLogger(t *testing.T) {
 	buf := bytes.Buffer{}
 	logger := LogfmtLoggerTo(&buf)
+	logger.hideTimestamp = true
 	l2 := logger.SetStandardFields("foo", "bar")
 
 	logger.LogErrorMessage("uh oh")
@@ -90,18 +91,16 @@ func TestLogWithStandardFieldsMakesNewLogger(t *testing.T) {
 
 func TestJSONLog(t *testing.T) {
 	buf := bytes.Buffer{}
-	GlobalLogger = JSONLoggerTo(&buf)
-	LogInfoMessage("something", "key", 4)
+	logger := JSONLoggerTo(&buf)
+	logger.hideTimestamp = true
+	logger.LogInfoMessage("something", "key", 4)
 	checkLogFormatMatches(t, "{\"key\":4,\"level\":\"info\",\"msg\":\"something\"}\n", &buf)
 }
 
 func TestJSONLogWithTimestamp(t *testing.T) {
 	buf := bytes.Buffer{}
-
-	SetupJSONLoggerTo(&buf)
-	UseTimestamp(true)
-
-	LogInfoMessage("something", "key", 4)
+	log := JSONLoggerTo(&buf)
+	log.LogInfoMessage("something", "key", 4)
 	assertTimestampWithin(t, &buf)
 }
 
@@ -119,7 +118,9 @@ func assertTimestampWithin(t *testing.T, buf *bytes.Buffer) {
 
 func logWithBuffer() *bytes.Buffer {
 	buf := bytes.Buffer{}
-	GlobalLogger = LogfmtLoggerTo(&buf)
+	log := LogfmtLoggerTo(&buf)
+	log.hideTimestamp = true
+	GlobalLogger = log
 	return &buf
 }
 

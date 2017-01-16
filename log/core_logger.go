@@ -8,7 +8,7 @@ import (
 
 type CoreLogger struct {
 	levels.Levels
-	useTimestamp bool
+	hideTimestamp bool
 }
 
 func NewCoreLogger(l levels.Levels) *CoreLogger {
@@ -37,10 +37,10 @@ func (cl *CoreLogger) LogError(keyvals ...interface{}) {
 	cl.Levels.Error().Log(encodeCompoundValues(cl.logTimestamp(keyvals)...)...)
 }
 
-func (cl *CoreLogger) SetStandardFields(keyvals ...interface{}) *CoreLogger {
+func (cl *CoreLogger) SetStandardFields(keyvals ...interface{}) Logger {
 	encoded := encodeCompoundValues(keyvals...)
 	newLogger := NewCoreLogger(cl.Levels.With(encoded...))
-	newLogger.UseTimestamp(cl.useTimestamp)
+	newLogger.hideTimestamp = cl.hideTimestamp
 	return newLogger
 }
 
@@ -48,12 +48,8 @@ func (cl *CoreLogger) With(keyvals ...interface{}) Logger {
 	return cl.SetStandardFields(keyvals...)
 }
 
-func (cl *CoreLogger) UseTimestamp(shouldUse bool) {
-	cl.useTimestamp = shouldUse
-}
-
 func (cl *CoreLogger) logTimestamp(keyvals []interface{}) []interface{} {
-	if cl.useTimestamp {
+	if !cl.hideTimestamp {
 		return append(keyvals, "timestamp", defaultTimeUTC())
 	}
 	return keyvals

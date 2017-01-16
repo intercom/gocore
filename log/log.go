@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	GlobalLogger *CoreLogger // level based logger
+	GlobalLogger Logger
 )
 
 // Logger represents a logger with inheritable context
@@ -60,12 +60,7 @@ func LogError(keyvals ...interface{}) {
 
 // Sets standard fields on the logger, for all calls
 func SetStandardFields(keyvals ...interface{}) {
-	GlobalLogger = GlobalLogger.SetStandardFields(keyvals...)
-}
-
-// Set whether a timestamp field is added to each log message
-func UseTimestamp(shouldUse bool) {
-	GlobalLogger.useTimestamp = true
+	GlobalLogger = GlobalLogger.With(keyvals...)
 }
 
 func JSONLoggerTo(writer io.Writer) *CoreLogger {
