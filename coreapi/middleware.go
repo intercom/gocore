@@ -64,15 +64,15 @@ func WithRequestID(next http.Handler) http.Handler {
 
 // WithLogger adds a "logger" key to the request context.
 // it will use a requestID as a standard field, if available
-func WithLogger(log log.Logger) func(next http.Handler) http.Handler {
+func WithLogger(base log.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
+			annotatedLog := base.With("path", r.URL)
 			requestID := r.Context().Value("requestID")
 			if requestID != nil {
-				log = log.With("requestID", requestID)
+				annotatedLog = annotatedLog.With("requestID", requestID)
 			}
-			log = log.With("path", r.URL)
-			r = r.WithContext(context.WithValue(r.Context(), "logger", log))
+			r = r.WithContext(context.WithValue(r.Context(), "logger", annotatedLog))
 			next.ServeHTTP(w, r)
 		}
 		return http.HandlerFunc(fn)
