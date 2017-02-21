@@ -14,7 +14,7 @@ func NewLogEventSink(logger log.Logger) *LogEventSink {
 func (sink *LogEventSink) SendEvent(eventName string, fields map[string]interface{}) {
 	keyVals := []interface{}{}
 	for key, value := range fields {
-		keyVals = append(keyVals, []interface{}{key, value})
+		keyVals = append(keyVals, key, value)
 	}
 	sink.logger.LogInfoMessage(eventName, keyVals...)
 }
