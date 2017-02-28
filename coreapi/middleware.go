@@ -67,7 +67,7 @@ func WithRequestID(next http.Handler) http.Handler {
 func WithLogger(base log.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
-			annotatedLog := base.With("path", r.URL)
+			annotatedLog := base.With("path", r.URL.Path)
 			requestID := r.Context().Value("requestID")
 			if requestID != nil {
 				annotatedLog = annotatedLog.With("requestID", requestID)
