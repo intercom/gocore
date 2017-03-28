@@ -57,3 +57,8 @@ func SetGauge(metricName string, val float32) {
 func SetPrefix(prefix string) {
 	globalMetrics.SetPrefix(prefix)
 }
+
+// WithTag returns a new MetricsRecorder that has the tags added to it.
+func WithTag(key, value string) MetricsRecorder {
+	return globalMetrics.withTag(key, value)
+}
