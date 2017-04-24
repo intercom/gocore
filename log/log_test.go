@@ -10,49 +10,49 @@ import (
 func TestLogInfo(t *testing.T) {
 	buf := logWithBuffer()
 	LogInfo("foo", "bar")
-	checkLogFormatMatches(t, "level=info foo=bar\n", buf)
+	checkLogFormatMatches(t, "foo=bar level=info\n", buf)
 }
 
 func TestLogInfoWithOneValueBecomesMessage(t *testing.T) {
 	buf := logWithBuffer()
 	LogInfo("foo")
-	checkLogFormatMatches(t, "level=info msg=foo\n", buf)
+	checkLogFormatMatches(t, "msg=foo level=info\n", buf)
 }
 
 func TestLogInfoMessage(t *testing.T) {
 	buf := logWithBuffer()
 	LogInfoMessage("my message")
-	checkLogFormatMatches(t, "level=info msg=\"my message\"\n", buf)
+	checkLogFormatMatches(t, "msg=\"my message\" level=info\n", buf)
 }
 
 func TestLogInfoMessageWithExtra(t *testing.T) {
 	buf := logWithBuffer()
 	LogInfoMessage("my message", "foo", 7)
-	checkLogFormatMatches(t, "level=info foo=7 msg=\"my message\"\n", buf)
+	checkLogFormatMatches(t, "foo=7 msg=\"my message\" level=info\n", buf)
 }
 
 func TestLogErrorMessageWithExtra(t *testing.T) {
 	buf := logWithBuffer()
 	LogErrorMessage("my message", "bar", 7.6)
-	checkLogFormatMatches(t, "level=error bar=7.6 msg=\"my message\"\n", buf)
+	checkLogFormatMatches(t, "bar=7.6 msg=\"my message\" level=error\n", buf)
 }
 
 func TestLogInfoWithCompoundTypeArray(t *testing.T) {
 	buf := logWithBuffer()
 	LogInfo("key", []string{"foo", "bar"})
-	checkLogFormatMatches(t, "level=info key=\"[foo bar]\"\n", buf)
+	checkLogFormatMatches(t, "key=\"[foo bar]\" level=info\n", buf)
 }
 
 func TestLogInfoWithCompoundTypeMap(t *testing.T) {
 	buf := logWithBuffer()
 	LogInfo("key", map[string]interface{}{"another": 12})
-	checkLogFormatMatches(t, "level=info key=map[another:12]\n", buf)
+	checkLogFormatMatches(t, "key=map[another:12] level=info\n", buf)
 }
 
 func TestLogInfoWithCompoundTypeStruct(t *testing.T) {
 	buf := logWithBuffer()
 	LogInfo("key", testTypeNotStringer{"foo"}, "bar", testTypeStringer{"bar"})
-	checkLogFormatMatches(t, "level=info key={Foo:foo} bar=bar\n", buf)
+	checkLogFormatMatches(t, "key={Foo:foo} bar=bar level=info\n", buf)
 }
 
 func TestLogWithStandardFields(t *testing.T) {
@@ -60,11 +60,11 @@ func TestLogWithStandardFields(t *testing.T) {
 
 	SetStandardFields("foo", "bar")
 	LogErrorMessage("uh oh")
-	checkLogFormatMatches(t, "level=error foo=bar msg=\"uh oh\"\n", buf)
+	checkLogFormatMatches(t, "foo=bar msg=\"uh oh\" level=error\n", buf)
 
 	SetStandardFields("zap", "zam")
 	LogInfoMessage("something", "key", 4)
-	checkLogFormatMatches(t, "level=info foo=bar zap=zam key=4 msg=something\n", buf)
+	checkLogFormatMatches(t, "foo=bar zap=zam key=4 msg=something level=info\n", buf)
 }
 
 func TestLogWithStandardFieldsAndTimestamp(t *testing.T) {
@@ -83,10 +83,10 @@ func TestLogWithStandardFieldsMakesNewLogger(t *testing.T) {
 	l2 := logger.SetStandardFields("foo", "bar")
 
 	logger.LogErrorMessage("uh oh")
-	checkLogFormatMatches(t, "level=error msg=\"uh oh\"\n", &buf)
+	checkLogFormatMatches(t, "msg=\"uh oh\" level=error\n", &buf)
 
 	l2.LogErrorMessage("uh oh")
-	checkLogFormatMatches(t, "level=error foo=bar msg=\"uh oh\"\n", &buf)
+	checkLogFormatMatches(t, "foo=bar msg=\"uh oh\" level=error\n", &buf)
 }
 
 func TestJSONLog(t *testing.T) {

@@ -3,16 +3,16 @@ package log
 import (
 	"time"
 
-	"github.com/go-kit/kit/log/levels"
+	"github.com/go-kit/kit/log"
 )
 
 type CoreLogger struct {
-	levels.Levels
+	log.Logger
 	hideTimestamp bool
 }
 
-func NewCoreLogger(l levels.Levels) *CoreLogger {
-	return &CoreLogger{Levels: l}
+func NewCoreLogger(l log.Logger) *CoreLogger {
+	return &CoreLogger{Logger: l}
 }
 
 func (cl *CoreLogger) LogInfoMessage(message string, keyvalues ...interface{}) {
@@ -27,19 +27,19 @@ func (cl *CoreLogger) LogInfo(keyvals ...interface{}) {
 	if len(keyvals) == 1 {
 		keyvals = []interface{}{"msg", keyvals[0]}
 	}
-	cl.Levels.Info().Log(encodeCompoundValues(cl.logTimestamp(keyvals)...)...)
+	cl.Logger.Log(encodeCompoundValues(append(cl.logTimestamp(keyvals), "level", "info")...)...)
 }
 
 func (cl *CoreLogger) LogError(keyvals ...interface{}) {
 	if len(keyvals) == 1 {
 		keyvals = []interface{}{"msg", keyvals[0]}
 	}
-	cl.Levels.Error().Log(encodeCompoundValues(cl.logTimestamp(keyvals)...)...)
+	cl.Logger.Log(encodeCompoundValues(append(cl.logTimestamp(keyvals), "level", "error")...)...)
 }
 
 func (cl *CoreLogger) SetStandardFields(keyvals ...interface{}) Logger {
-	encoded := encodeCompoundValues(keyvals...)
-	newLogger := NewCoreLogger(cl.Levels.With(encoded...))
+	kitLogger := log.With(cl.Logger, keyvals...)
+	newLogger := NewCoreLogger(kitLogger)
 	newLogger.hideTimestamp = cl.hideTimestamp
 	return newLogger
 }
