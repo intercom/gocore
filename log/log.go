@@ -6,7 +6,6 @@ import (
 	"reflect"
 
 	kitlog "github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/levels"
 )
 
 var (
@@ -64,15 +63,15 @@ func SetStandardFields(keyvals ...interface{}) {
 }
 
 func JSONLoggerTo(writer io.Writer) *CoreLogger {
-	return NewCoreLogger(levels.New(kitlog.NewJSONLogger(writer)))
+	return NewCoreLogger(kitlog.NewJSONLogger(writer))
 }
 
 func LogfmtLoggerTo(writer io.Writer) *CoreLogger {
-	return NewCoreLogger(levels.New(kitlog.NewLogfmtLogger(writer)))
+	return NewCoreLogger(kitlog.NewLogfmtLogger(writer))
 }
 
 func NoopLogger() *CoreLogger {
-	return NewCoreLogger(levels.New(kitlog.NewNopLogger()))
+	return NewCoreLogger(kitlog.NewNopLogger())
 }
 
 // Encode compound values using %+v. To use a custom encoding, use a type that implements fmt.Stringer

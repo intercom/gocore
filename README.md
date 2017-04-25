@@ -177,25 +177,3 @@ type UserResponse struct {
 	Email string `json:"email"`
 }
 ``` 
-
-
-#### Dependencies
-
-GoKit Log, Levels:
-
-```
-"github.com/go-kit/kit/log"
-"github.com/go-kit/kit/log/levels"
-```
-
-Armon/Go-Metrics:
-
-```
-"github.com/armon/go-metrics"
-```
-
-Sentry/Raven:
-
-```
-"github.com/getsentry/raven-go"
-```
