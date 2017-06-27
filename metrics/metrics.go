@@ -60,5 +60,5 @@ func SetPrefix(prefix string) {
 
 // WithTag returns a new MetricsRecorder that has the tags added to it.
 func WithTag(key, value string) MetricsRecorder {
-	return globalMetrics.withTag(key, value)
+	return globalMetrics.WithTag(key, value)
 }
