@@ -14,8 +14,11 @@ func TestDatadogStatsdTagKeyValue(t *testing.T) {
 	tagged.MeasureSince("foo", time.Now())
 	tags := tagged.(*metrics.DatadogStatsdRecorder).GetTags()
 
-	if want, have := "tagkey:tagvalue", tags[0]; want != have {
-		t.Errorf("want %#v tag, have %#v tag", want, have)
+	if want, have := "tagkey", tags[0].Name; want != have {
+		t.Errorf("want %s tag name, have %s tag name", want, have)
+	}
+	if want, have := "tagvalue", tags[0].Value; want != have {
+		t.Errorf("want %s tag value, have %s tag value", want, have)
 	}
 }
 
@@ -38,12 +41,18 @@ func TestDatadogStatsdMultiTags(t *testing.T) {
 	tagged = tagged.WithTag("anotherkey", "anothervalue")
 	tags := tagged.(*metrics.DatadogStatsdRecorder).GetTags()
 
-	if want, have := "tagkey:tagvalue", tags[0]; want != have {
-		t.Errorf("want %#v tag, have %#v tag", want, have)
+	if want, have := "tagkey", tags[0].Name; want != have {
+		t.Errorf("want %s tag name, have %s tag name", want, have)
+	}
+	if want, have := "tagvalue", tags[0].Value; want != have {
+		t.Errorf("want %s tag value, have %s tag value", want, have)
 	}
 
-	if want, have := "anotherkey:anothervalue", tags[1]; want != have {
-		t.Errorf("want %#v tag, have %#v tag", want, have)
+	if want, have := "anotherkey", tags[1].Name; want != have {
+		t.Errorf("want %s tag name, have %s tag name", want, have)
+	}
+	if want, have := "anothervalue", tags[1].Value; want != have {
+		t.Errorf("want %s tag value, have %s tag value", want, have)
 	}
 }
 
