@@ -49,12 +49,18 @@ func TestDatadogStatsdMetricTags(t *testing.T) {
 		t.Errorf("want %#v tags, have %#v tags", want, have)
 	}
 
-	if want, have := "foo:1", tags[0]; want != have {
-		t.Errorf("want first tag %#v, have %#v", want, have)
+	if want, have := "foo", tags[0].Name; want != have {
+		t.Errorf("want %s tag name, have %s tag name", want, have)
+	}
+	if want, have := "1", tags[0].Value; want != have {
+		t.Errorf("want %s tag value, have %s tag value", want, have)
 	}
 
-	if want, have := "bar:2", tags[1]; want != have {
-		t.Errorf("want second tag %#v, have %#v", want, have)
+	if want, have := "bar", tags[1].Name; want != have {
+		t.Errorf("want %s tag name, have %s tag name", want, have)
+	}
+	if want, have := "2", tags[1].Value; want != have {
+		t.Errorf("want %s tag value, have %s tag value", want, have)
 	}
 }
 
@@ -64,8 +70,8 @@ func TestGetTeedMetricsRecorder(t *testing.T) {
 	tagged := teed.WithTag("key", "")
 	tags := (tagged.(*metrics.TeedMetricsRecorder).GetMetrics()[0]).(*metrics.DatadogStatsdRecorder).GetTags()
 
-	if want, have := "key", tags[0]; want != have {
-		t.Errorf("want %#v tag, have %#v tag", want, have)
+	if want, have := "key", tags[0].Name; want != have {
+		t.Errorf("want %s tag name, have %s tag name", want, have)
 	}
 }
 

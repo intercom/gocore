@@ -2,7 +2,6 @@ package metrics
 
 import (
 	"errors"
-	"fmt"
 	"time"
 )
 import (
@@ -14,14 +13,7 @@ import (
 type DatadogStatsdRecorder struct {
 	*StatsdRecorder
 	sink *datadog.DogStatsdSink // we need direct access to the strongly typed underlying sink
-	tags []string
-}
-
-func flatKey(key, value string) string {
-	if value != "" {
-		return fmt.Sprintf("%s:%s", key, value)
-	}
-	return key
+	tags []metrics.Label
 }
 
 func NewDatadogStatsdRecorder(statsiteEndpoint, namespace, hostname string) (*DatadogStatsdRecorder, error) {
@@ -35,7 +27,7 @@ func NewDatadogStatsdRecorder(statsiteEndpoint, namespace, hostname string) (*Da
 	config := metrics.DefaultConfig(namespace)
 	config.EnableHostname = false
 	m, _ := metrics.New(config, sink)
-	return &DatadogStatsdRecorder{StatsdRecorder: &StatsdRecorder{m, ""}, sink: sink, tags: []string{}}, nil
+	return &DatadogStatsdRecorder{StatsdRecorder: &StatsdRecorder{m, ""}, sink: sink, tags: []metrics.Label{}}, nil
 }
 
 func (dd *DatadogStatsdRecorder) IncrementCount(metricName string) {
@@ -43,7 +35,7 @@ func (dd *DatadogStatsdRecorder) IncrementCount(metricName string) {
 }
 
 func (dd *DatadogStatsdRecorder) IncrementCountBy(metricName string, amount int) {
-	dd.sink.IncrCounterWithTags(
+	dd.sink.IncrCounterWithLabels(
 		dd.withPrefixAndServiceName(metricName, "counter"),
 		float32(amount),
 		dd.tags,
@@ -58,7 +50,7 @@ func (dd *DatadogStatsdRecorder) MeasureSince(metricName string, since time.Time
 }
 
 func (dd *DatadogStatsdRecorder) MeasureDurationMS(metricName string, durationMS float32) {
-	dd.sink.AddSampleWithTags(
+	dd.sink.IncrCounterWithLabels(
 		dd.withPrefixAndServiceName(metricName, "timer"),
 		durationMS,
 		dd.tags,
@@ -66,7 +58,7 @@ func (dd *DatadogStatsdRecorder) MeasureDurationMS(metricName string, durationMS
 }
 
 func (dd *DatadogStatsdRecorder) SetGauge(metricName string, val float32) {
-	dd.sink.SetGaugeWithTags(
+	dd.sink.SetGaugeWithLabels(
 		dd.withPrefixAndServiceName(metricName, "gauge"),
 		val,
 		dd.tags,
@@ -75,13 +67,13 @@ func (dd *DatadogStatsdRecorder) SetGauge(metricName string, val float32) {
 
 // WithTag returns a new DatadogStatsdRecorder that has the tags added to it.
 func (dd *DatadogStatsdRecorder) WithTag(key, value string) MetricsRecorder {
-	newRecorder := &DatadogStatsdRecorder{StatsdRecorder: dd.StatsdRecorder, sink: dd.sink, tags: []string{}}
+	newRecorder := &DatadogStatsdRecorder{StatsdRecorder: dd.StatsdRecorder, sink: dd.sink, tags: []metrics.Label{}}
 	newRecorder.tags = append(newRecorder.tags, dd.tags...)
-	newRecorder.tags = append(newRecorder.tags, flatKey(key, value))
+	newRecorder.tags = append(newRecorder.tags, metrics.Label{Name: key, Value: value})
 	return newRecorder
 }
 
-func (dd *DatadogStatsdRecorder) GetTags() []string {
+func (dd *DatadogStatsdRecorder) GetTags() []metrics.Label {
 	return dd.tags
 }
 
