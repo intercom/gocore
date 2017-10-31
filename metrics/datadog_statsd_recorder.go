@@ -50,7 +50,7 @@ func (dd *DatadogStatsdRecorder) MeasureSince(metricName string, since time.Time
 }
 
 func (dd *DatadogStatsdRecorder) MeasureDurationMS(metricName string, durationMS float32) {
-	dd.sink.IncrCounterWithLabels(
+	dd.sink.AddSampleWithLabels(
 		dd.withPrefixAndServiceName(metricName, "timer"),
 		durationMS,
 		dd.tags,
